@@ -26,17 +26,80 @@ export function activate(context: vscode.ExtensionContext) {
     treeDataProvider: new SampleDataProvider(),
   });
   context.subscriptions.push(sampleTreeView);
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("stocky.showIntroduction", () => {
+      const panel = vscode.window.createWebviewPanel(
+        "showIntroduction",
+        "Introduction",
+        vscode.ViewColumn.One,
+        {}
+      );
+      panel.webview.html = getIntroductionHtml();
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("stocky.showItemTwo", () => {
+      vscode.window.showInformationMessage("Item Two");
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand("stocky.showItemThree", () => {
+      vscode.window.showInformationMessage("Item Three");
+    })
+  );
 }
 
 class SampleDataProvider implements vscode.TreeDataProvider<string> {
   getTreeItem(element: string): vscode.TreeItem {
-    return new vscode.TreeItem(element);
+    const treeItem = new vscode.TreeItem(element);
+    switch (element) {
+      case "Introduction to the Extension":
+        treeItem.command = {
+          command: "stocky.showIntroduction",
+          title: "Show Introduction",
+          arguments: [element],
+        };
+        break;
+      case "Two":
+        treeItem.command = {
+          command: "stocky.showItemTwo",
+          title: "Show Item Two",
+          arguments: [element],
+        };
+        break;
+      case "Three":
+        treeItem.command = {
+          command: "stocky.showItemThree",
+          title: "Show Item Three",
+          arguments: [element],
+        };
+        break;
+    }
+    return treeItem;
   }
 
-  getChildren(): Thenable<string[]> {
-    return Promise.resolve(["One", "Two", "Three"]);
+  getChildren(element?: string | undefined): vscode.ProviderResult<string[]> {
+    return Promise.resolve(["Introduction to the Extension", "Two", "Three"]);
   }
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {}
+
+function getIntroductionHtml() {
+  return `<!DOCTYPE html>
+	<html lang="en">
+	<head>
+	  <meta charset="UTF-8">
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	  <title>Introduction</title>
+	</head>
+	<body>
+	  <h1>Welcome to the Stocky Extension</h1>
+	  <p>This is an introduction to how you can monitor your favorite stocks using our extension.</p>
+	</body>
+	</html>`;
+}
